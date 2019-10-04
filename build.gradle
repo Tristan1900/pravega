@@ -94,14 +94,18 @@ allprojects {
     configurations.all {
         resolutionStrategy {
             //failOnVersionConflict()
-            force "org.slf4j:slf4j-api:" + slf4jApiVersion
-            force "org.apache.commons:commons-lang3:" + commonsLang3Version
-            force "org.apache.curator:curator-framework:" + apacheCuratorVersion
+            force "com.google.guava:guava:" + guavaVersion
             force "com.google.protobuf:protobuf-java:" + protobufProtocVersion
             force "io.grpc:grpc-context:" + grpcVersion
-            force "com.google.guava:guava:" + guavaVersion
+            force "commons-beanutils:commons-beanutils:" + commonsBeanutilsVersion
+            force "org.apache.commons:commons-compress:" + apacheCommonsCompressVersion
+            force "org.apache.commons:commons-lang3:" + commonsLang3Version
+            force "org.apache.curator:curator-framework:" + apacheCuratorVersion
             force "org.glassfish.jersey.core:jersey-common:" + jerseyVersion
             force "org.glassfish.jersey.core:jersey-server:" + jerseyVersion
+            force "com.fasterxml.jackson.core:jackson-databind:" + jacksonVersion 
+            force "org.slf4j:slf4j-api:" + slf4jApiVersion
+
             dependencySubstitution {
                 substitute module("javax.ws.rs:jsr311-api") with module("javax.ws.rs:javax.ws.rs-api:" + javaxwsrsApiVersion)
             }
@@ -705,8 +709,8 @@ project('standalone') {
         main = "io.pravega.local.LocalPravegaEmulator"
         classpath = sourceSets.main.runtimeClasspath
         systemProperties System.getProperties()
-        systemProperties 'logback.configurationFile' : new File('config/logback.xml').absolutePath
-        systemProperties 'singlenode.configurationFile' : new File("config/standalone-config.properties").absolutePath
+        systemProperties 'logback.configurationFile' : new File("${project.rootDir}/config/logback.xml")
+        systemProperties 'singlenode.configurationFile' : new File("${project.rootDir}/config/standalone-config.properties")
 
         if (systemProperties.get("extDirs") != null) {
             classpath += files(systemProperties.get("extDirs"))
@@ -833,6 +837,8 @@ project('test:system') {
         systemProperty "imagePrefix", System.getProperty("imagePrefix", "pravega")  // the default value of imagePrefix is pravega.
         systemProperty "pravegaImageName", System.getProperty("pravegaImageName", "pravega") // pravega image name
         systemProperty "bookkeeperImageName", System.getProperty("bookkeeperImageName", "bookkeeper") // bookkeeper image name
+        systemProperty "zookeeperImageName", System.getProperty("zookeeperImageName", "zookeeper") // zookkeeper image name
+        systemProperty "zookeeperImageVersion", System.getProperty("zookeeperImageVersion", "latest") // zookeeper image version
         systemProperty "imageVersion", System.getProperty("imageVersion") // pravega version.
         // bookkeeper version defaults to pravega version.
         systemProperty "pravegaBookkeeperVersion", System.getProperty("pravegaBookkeeperVersion", System.getProperty("imageVersion"))
@@ -850,6 +856,7 @@ project('test:system') {
         }
         
         systemProperty "securityEnabled", System.getProperty("securityEnabled", "false")
+        systemProperty "logLevel", System.getProperty("log.level", "DEBUG")
        
         maxParallelForks = 1
     }
@@ -913,6 +920,11 @@ project('test:system') {
         systemProperty "skipServiceInstallation", System.getProperty("skipServiceInstallation")
         systemProperty "segmentStoreExtraEnv", System.getProperty("segmentStoreExtraEnv")
         systemProperty "awsExec", System.getProperty("awsExec")
+        systemProperty "pravegaImageName", System.getProperty("pravegaImageName", "pravega") // pravega image name
+        systemProperty "bookkeeperImageName", System.getProperty("bookkeeperImageName", "bookkeeper") // bookkeeper image name
+        systemProperty "zookeeperImageName", System.getProperty("zookeeperImageName", "zookeeper") // zookkeeper image name
+        systemProperty "zookeeperImageVersion", System.getProperty("zookeeperImageVersion", "latest") // zookeeper image version
+        systemProperty "imagePrefix", System.getProperty("imagePrefix", "pravega")  // the default value of imagePrefix is pravega.
 
         if (System.getProperty("execType") == null) {
             systemProperty "execType", "DOCKER"
@@ -932,6 +944,7 @@ project('test:system') {
         }
         maxParallelForks = 1
         systemProperty "dockerImageRegistry", "${dockerRegistryUrl}"
+        systemProperty "logLevel", System.getProperty("log.level", "DEBUG")
 
     }
 
